@@ -1,162 +1,388 @@
-// script.js - Scientific Calculator Logic
-let display = document.getElementById('display');
-let history = document.getElementById('history');
-let lastResult = 0;
+// Calculator State
+let currentInput = '0';
+let previousInput = '';
+let operator = null;
+let expression = '';
+let memory = 0;
+let currentMode = 'deg';
+let resetInput = false;
 
-// Add number/operator to display
-function addToDisplay(value) {
-    display.value += value;
+// DOM Elements
+const displayElement = document.getElementById('display');
+const expressionElement = document.getElementById('expression');
+const memoryLed = document.getElementById('memoryLed');
+const memoryValue = document.getElementById('memoryValue');
+const degMode = document.getElementById('degMode');
+const radMode = document.getElementById('radMode');
+
+// Initialize
+function init() {
+    updateDisplay();
+    
+    // Mode toggle listeners
+    degMode.addEventListener('click', () => {
+        degMode.classList.add('active');
+        radMode.classList.remove('active');
+        currentMode = 'deg';
+    });
+    
+    radMode.addEventListener('click', () => {
+        radMode.classList.add('active');
+        degMode.classList.remove('active');
+        currentMode = 'rad';
+    });
 }
 
-// Add scientific function with parentheses
-function addFunction(func) {
-    switch(func) {
-        case 'π':
-            display.value += Math.PI.toFixed(8);
-            break;
-        case 'e':
-            display.value += Math.E.toFixed(8);
-            break;
-        case '^2':
-            display.value = evaluateExpression(display.value + '^2');
-            break;
-        case '^(1/2)':
-            display.value = '√(' + display.value + ')';
-            break;
-        default:
-            display.value += func;
+// Update display
+function updateDisplay() {
+    displayElement.textContent = currentInput;
+    expressionElement.textContent = expression;
+    memoryValue.textContent = memory;
+    memoryLed.style.opacity = memory !== 0 ? '1' : '0';
+    
+    // Remove error class if present
+    displayElement.classList.remove('error');
+}
+
+// Append number
+function appendNumber(num) {
+    if (currentInput === '0' || resetInput) {
+        currentInput = num;
+        resetInput = false;
+    } else {
+        currentInput += num;
     }
+    updateDisplay();
 }
 
-// Clear everything
+// Append decimal
+function appendDecimal() {
+    if (resetInput) {
+        currentInput = '0.';
+        resetInput = false;
+    } else if (!currentInput.includes('.')) {
+        currentInput += '.';
+    }
+    updateDisplay();
+}
+
+// Clear all
 function clearAll() {
-    display.value = '';
-    history.value = '';
-    lastResult = 0;
+    currentInput = '0';
+    previousInput = '';
+    operator = null;
+    expression = '';
+    resetInput = false;
+    updateDisplay();
 }
 
-// Clear last entry
-function clearEntry() {
-    display.value = display.value.slice(0, -1);
+// Delete last character
+function deleteLast() {
+    if (currentInput.length > 1) {
+        currentInput = currentInput.slice(0, -1);
+    } else {
+        currentInput = '0';
+    }
+    updateDisplay();
 }
 
-// Calculate result
-function calculate() {
-    try {
-        let expression = display.value;
-        
-        // Replace symbols for evaluation
-        expression = expression.replace(/×/g, '*')
-                               .replace(/÷/g, '/')
-                               .replace(/−/g, '-')
-                               .replace(/\^/g, '**')
-                               .replace(/mod/g, '%')
-                               .replace(/√\(/g, 'Math.sqrt(')
-                               .replace(/sin\(/g, 'Math.sin(')
-                               .replace(/cos\(/g, 'Math.cos(')
-                               .replace(/tan\(/g, 'Math.tan(')
-                               .replace(/log\(/g, 'Math.log10(')
-                               .replace(/ln\(/g, 'Math.log(')
-                               .replace(/exp\(/g, 'Math.exp(')
-                               .replace(/abs\(/g, 'Math.abs(')
-                               .replace(/floor\(/g, 'Math.floor(');
-        
-        // Handle factorial
-        if (expression.includes('!')) {
-            let parts = expression.split('!');
-            let num = parseFloat(parts[0]);
-            let fact = 1;
-            for(let i = 1; i <= num; i++) fact *= i;
-            expression = fact + parts.slice(1).join('');
-        }
-        
-        // Handle power function (x^y)
-        if (expression.includes('^')) {
-            expression = expression.replace(/\^/g, '**');
-        }
-        
-        // Safe evaluation using Function constructor
-        let result = new Function('return ' + expression)();
-        
-        // Format result
-        if (!isFinite(result)) {
-            throw new Error('Invalid calculation');
-        }
-        
-        // Store history
-        history.value = display.value + ' =';
-        
-        // Format result (limit decimals)
-        if (Number.isInteger(result)) {
-            display.value = result;
+// Toggle sign
+function toggleSign() {
+    if (currentInput !== '0' && currentInput !== 'Error') {
+        if (currentInput.startsWith('-')) {
+            currentInput = currentInput.slice(1);
         } else {
-            display.value = result.toFixed(8).replace(/\.?0+$/, '');
+            currentInput = '-' + currentInput;
         }
-        
-        lastResult = result;
-        
-    } catch (error) {
-        display.value = 'Error';
-        console.error('Calculation error:', error);
     }
+    updateDisplay();
 }
 
-// Evaluate expression safely (helper for power functions)
-function evaluateExpression(expr) {
-    try {
-        expr = expr.replace(/×/g, '*')
-                   .replace(/÷/g, '/')
-                   .replace(/−/g, '-');
-        let result = new Function('return ' + expr)();
-        return result;
-    } catch {
-        return expr;
-    }
-}
-
-// Keyboard support
-document.addEventListener('keydown', function(event) {
-    const key = event.key;
-    
-    // Numbers
-    if (/[0-9]/.test(key)) {
-        addToDisplay(key);
-    }
-    
-    // Operators
-    if (key === '+' || key === '-' || key === '*' || key === '/') {
-        let op = key;
-        if (key === '*') op = '×';
-        if (key === '/') op = '÷';
-        addToDisplay(op);
-    }
-    
-    // Enter key for calculate
-    if (key === 'Enter') {
-        event.preventDefault();
+// Insert operator
+function insertOperator(op) {
+    if (operator !== null) {
         calculate();
     }
     
-    // Backspace for clear entry
-    if (key === 'Backspace') {
-        clearEntry();
+    previousInput = currentInput;
+    operator = op;
+    expression = previousInput + ' ' + getOperatorSymbol(op);
+    currentInput = '0';
+    updateDisplay();
+}
+
+// Get operator symbol for display
+function getOperatorSymbol(op) {
+    const symbols = {
+        '+': '+',
+        '-': '−',
+        '*': '×',
+        '/': '÷',
+        '^': '^'
+    };
+    return symbols[op] || op;
+}
+
+// Insert trig function
+function insertTrig(func) {
+    if (currentInput !== '0') {
+        calculate();
     }
     
-    // Escape for clear all
-    if (key === 'Escape') {
-        clearAll();
+    let value = parseFloat(currentInput);
+    let result;
+    
+    if (currentMode === 'deg') {
+        // Convert degrees to radians
+        value = value * (Math.PI / 180);
     }
     
-    // Decimal point
-    if (key === '.') {
-        addToDisplay('.');
+    switch(func) {
+        case 'sin':
+            result = Math.sin(value);
+            expression = func + '(' + currentInput + '°)';
+            break;
+        case 'cos':
+            result = Math.cos(value);
+            expression = func + '(' + currentInput + '°)';
+            break;
+        case 'tan':
+            result = Math.tan(value);
+            expression = func + '(' + currentInput + '°)';
+            break;
     }
     
-    // Parentheses
-    if (key === '(' || key === ')') {
-        addToDisplay(key);
+    if (currentMode === 'rad') {
+        expression = func + '(' + currentInput + ' rad)';
+    }
+    
+    currentInput = result.toString();
+    resetInput = true;
+    updateDisplay();
+}
+
+// Insert function (log, ln)
+function insertFunction(func) {
+    if (currentInput !== '0') {
+        calculate();
+    }
+    
+    let value = parseFloat(currentInput);
+    let result;
+    
+    switch(func) {
+        case 'log':
+            result = Math.log10(value);
+            expression = 'log(' + currentInput + ')';
+            break;
+        case 'ln':
+            result = Math.log(value);
+            expression = 'ln(' + currentInput + ')';
+            break;
+    }
+    
+    currentInput = result.toString();
+    resetInput = true;
+    updateDisplay();
+}
+
+// Insert constant
+function insertConstant(constant) {
+    if (resetInput) {
+        currentInput = '';
+    }
+    
+    if (constant === 'pi') {
+        currentInput = Math.PI.toString();
+        expression = 'π';
+    } else if (constant === 'e') {
+        currentInput = Math.E.toString();
+        expression = 'e';
+    }
+    
+    resetInput = true;
+    updateDisplay();
+}
+
+// Insert parenthesis
+function insertParenthesis(paren) {
+    if (currentInput === '0' || resetInput) {
+        currentInput = paren;
+        resetInput = false;
+    } else {
+        currentInput += paren;
+    }
+    updateDisplay();
+}
+
+// Calculate square root
+function calculateSquareRoot() {
+    let value = parseFloat(currentInput);
+    
+    if (value < 0) {
+        currentInput = 'Error';
+        displayElement.classList.add('error');
+    } else {
+        let result = Math.sqrt(value);
+        expression = '√(' + currentInput + ')';
+        currentInput = result.toString();
+        resetInput = true;
+    }
+    updateDisplay();
+}
+
+// Calculate percentage
+function calculatePercentage() {
+    let value = parseFloat(currentInput);
+    
+    if (operator && previousInput) {
+        // Calculate percentage of previous number
+        let prev = parseFloat(previousInput);
+        let percentage = (prev * value) / 100;
+        currentInput = percentage.toString();
+        expression = previousInput + ' ' + getOperatorSymbol(operator) + ' ' + value + '%';
+    } else {
+        // Just convert to percentage
+        currentInput = (value / 100).toString();
+        expression = value + '%';
+    }
+    
+    resetInput = true;
+    updateDisplay();
+}
+
+// Calculate factorial
+function calculateFactorial() {
+    let value = parseFloat(currentInput);
+    
+    if (value < 0 || !Number.isInteger(value)) {
+        currentInput = 'Error';
+        displayElement.classList.add('error');
+    } else {
+        let result = 1;
+        for (let i = 2; i <= value; i++) {
+            result *= i;
+        }
+        expression = value + '!';
+        currentInput = result.toString();
+        resetInput = true;
+    }
+    updateDisplay();
+}
+
+// Memory functions
+function memoryStore() {
+    let value = parseFloat(currentInput);
+    if (!isNaN(value)) {
+        memory = value;
+        updateDisplay();
+    }
+}
+
+function memoryRecall() {
+    if (currentInput === '0' || resetInput) {
+        currentInput = memory.toString();
+        resetInput = false;
+    } else {
+        currentInput += memory.toString();
+    }
+    updateDisplay();
+}
+
+function memoryClear() {
+    memory = 0;
+    updateDisplay();
+}
+
+function memoryAdd() {
+    let value = parseFloat(currentInput);
+    if (!isNaN(value)) {
+        memory += value;
+        updateDisplay();
+    }
+}
+
+// Main calculate function
+function calculate() {
+    if (operator === null || resetInput) {
+        return;
+    }
+    
+    let prev = parseFloat(previousInput);
+    let current = parseFloat(currentInput);
+    let result;
+    
+    switch(operator) {
+        case '+':
+            result = prev + current;
+            break;
+        case '-':
+            result = prev - current;
+            break;
+        case '*':
+            result = prev * current;
+            break;
+        case '/':
+            if (current === 0) {
+                currentInput = 'Error';
+                displayElement.classList.add('error');
+                updateDisplay();
+                return;
+            }
+            result = prev / current;
+            break;
+        case '^':
+            result = Math.pow(prev, current);
+            break;
+        default:
+            return;
+    }
+    
+    // Handle precision issues
+    result = Math.round(result * 1e12) / 1e12;
+    
+    expression = previousInput + ' ' + getOperatorSymbol(operator) + ' ' + currentInput + ' =';
+    currentInput = result.toString();
+    operator = null;
+    previousInput = '';
+    resetInput = true;
+    updateDisplay();
+}
+
+// Keyboard support
+document.addEventListener('keydown', (e) => {
+    // Numbers
+    if (e.key >= '0' && e.key <= '9') {
+        appendNumber(e.key);
+    }
+    
+    // Operators
+    if (e.key === '+') insertOperator('+');
+    if (e.key === '-') insertOperator('-');
+    if (e.key === '*') insertOperator('*');
+    if (e.key === '/') insertOperator('/');
+    if (e.key === '^') insertOperator('^');
+    
+    // Special keys
+    if (e.key === '.') appendDecimal();
+    if (e.key === 'Enter' || e.key === '=') calculate();
+    if (e.key === 'Escape') clearAll();
+    if (e.key === 'Backspace') deleteLast();
+    
+    // Functions
+    if (e.key === 's') insertTrig('sin');
+    if (e.key === 'c') insertTrig('cos');
+    if (e.key === 't') insertTrig('tan');
+    if (e.key === 'l') insertFunction('log');
+    if (e.key === 'n') insertFunction('ln');
+    if (e.key === 'p') insertConstant('pi');
+    if (e.key === 'e') insertConstant('e');
+    
+    // Prevent default for calculator keys
+    if (['+', '-', '*', '/', '^', '.', 'Enter', '=', 'Escape', 'Backspace', 's', 'c', 't', 'l', 'n', 'p', 'e'].includes(e.key)) {
+        e.preventDefault();
     }
 });
 
-// Initialize display
-clearAll();
+// Initialize on load
+document.addEventListener('DOMContentLoaded', init);
