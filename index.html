@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>high‑level calculator · split files</title>
+    <!-- link to external CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="calculator">
+        <h1>
+            ⚙️ high‑level calculator
+            <span>v2</span>
+        </h1>
+        <div class="sub">enter numbers, choose operation — then press [=]</div>
+
+        <!-- input panel -->
+        <div class="input-group">
+            <label><i>A</i> first operand</label>
+            <input type="number" id="num1" placeholder="e.g. 24.5" value="12" step="any">
+        </div>
+        <div class="input-group">
+            <label><i>B</i> second operand</label>
+            <input type="number" id="num2" placeholder="e.g. 7" value="5" step="any">
+        </div>
+
+        <!-- operation buttons (6 basic + 2 extra) -->
+        <div class="operations">
+            <button class="op-btn" id="opAdd" title="addition">+</button>
+            <button class="op-btn" id="opSub" title="subtraction">−</button>
+            <button class="op-btn" id="opMul" title="multiplication">×</button>
+            <button class="op-btn" id="opDiv" title="division">÷</button>
+            <button class="op-btn" id="opPow" title="power (A ^ B)">xʸ</button>
+            <button class="op-btn" id="opMod" title="modulus (remainder)">mod</button>
+            <button class="op-btn" id="opSqrt" title="square root of A (ignores B)">√A</button>
+            <button class="op-btn" id="opPercent" title="A% of B">%</button>
+        </div>
+
+        <!-- main calculate row + result -->
+        <div class="equals-area">
+            <button class="equals-btn" id="calculateBtn"><i>=</i> calculate</button>
+            <div class="result-box">
+                <span class="result-label">result</span>
+                <input type="text" id="resultDisplay" readonly placeholder="0" value="17">
+            </div>
+        </div>
+
+        <!-- memory & utility bar (extended) -->
+        <div class="memory-bar">
+            <button class="memory-btn" id="clearInputs" title="clear both numbers">🧹 clear A&B</button>
+            <button class="memory-btn" id="recallExample" title="load example 144 ÷ 12">📋 example</button>
+            <button class="memory-btn" id="swapNumbers" title="swap A and B">🔄 swap</button>
+            <button class="memory-btn clear" id="resetResult" title="reset result only">🗑️ reset</button>
+        </div>
+        <footer>⚡ click op → then [=]  ·  sqrt uses A  ·  % = (A/100)*B</footer>
+    </div>
+
+    <!-- external JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
