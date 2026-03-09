@@ -1,205 +1,162 @@
-// script.js – high‑level calculator with extended operations
+// script.js - Scientific Calculator Logic
+let display = document.getElementById('display');
+let history = document.getElementById('history');
+let lastResult = 0;
 
-(function() {
-    'use strict';
+// Add number/operator to display
+function addToDisplay(value) {
+    display.value += value;
+}
 
-    // --- DOM elements ---
-    const num1 = document.getElementById('num1');
-    const num2 = document.getElementById('num2');
-    const resultDisplay = document.getElementById('resultDisplay');
-
-    // operation buttons (6 basic + 2 extra)
-    const btnAdd = document.getElementById('opAdd');
-    const btnSub = document.getElementById('opSub');
-    const btnMul = document.getElementById('opMul');
-    const btnDiv = document.getElementById('opDiv');
-    const btnPow = document.getElementById('opPow');
-    const btnMod = document.getElementById('opMod');
-    const btnSqrt = document.getElementById('opSqrt');      // √A   (ignores B)
-    const btnPercent = document.getElementById('opPercent'); // A% of B
-
-    // utility buttons
-    const calculateBtn = document.getElementById('calculateBtn');
-    const clearInputsBtn = document.getElementById('clearInputs');
-    const exampleBtn = document.getElementById('recallExample');
-    const swapBtn = document.getElementById('swapNumbers');
-    const resetResultBtn = document.getElementById('resetResult');
-
-    // --- current operation (default = '+') ---
-    let currentOp = '+';
-
-    // --- operation registry: symbol -> function (returns number or NaN for invalid) ---
-    const operations = {
-        '+': (a, b) => a + b,
-        '−': (a, b) => a - b,
-        '×': (a, b) => a * b,
-        '÷': (a, b) => (b === 0) ? NaN : a / b,
-        'xʸ': (a, b) => Math.pow(a, b),
-        'mod': (a, b) => (b === 0) ? NaN : a % b,
-        '√A': (a) => {                // ignores second number, only uses a
-            if (a < 0) return NaN;     // real result only for non‑negative
-            return Math.sqrt(a);
-        },
-        '%': (a, b) => (a / 100) * b   // percent: a% of b
-    };
-
-    // --- set active operation (highlight) ---
-    function setActiveOperation(opSymbol) {
-        const allOpBtns = [btnAdd, btnSub, btnMul, btnDiv, btnPow, btnMod, btnSqrt, btnPercent];
-        allOpBtns.forEach(btn => {
-            btn.style.background = '';
-            btn.style.boxShadow = '';
-            btn.style.color = '';
-        });
-
-        let target = null;
-        switch (opSymbol) {
-            case '+': target = btnAdd; break;
-            case '−': target = btnSub; break;
-            case '×': target = btnMul; break;
-            case '÷': target = btnDiv; break;
-            case 'xʸ': target = btnPow; break;
-            case 'mod': target = btnMod; break;
-            case '√A': target = btnSqrt; break;
-            case '%': target = btnPercent; break;
-            default: return;
-        }
-        if (target) {
-            target.style.background = '#dbe3f7';
-            target.style.boxShadow = 'inset 5px 5px 12px #b1bbd4, inset -5px -5px 10px #ffffff';
-            target.style.color = '#091831';
-        }
+// Add scientific function with parentheses
+function addFunction(func) {
+    switch(func) {
+        case 'π':
+            display.value += Math.PI.toFixed(8);
+            break;
+        case 'e':
+            display.value += Math.E.toFixed(8);
+            break;
+        case '^2':
+            display.value = evaluateExpression(display.value + '^2');
+            break;
+        case '^(1/2)':
+            display.value = '√(' + display.value + ')';
+            break;
+        default:
+            display.value += func;
     }
+}
 
-    // --- change current operation ---
-    function setOperation(opSymbol) {
-        currentOp = opSymbol;
-        setActiveOperation(opSymbol);
+// Clear everything
+function clearAll() {
+    display.value = '';
+    history.value = '';
+    lastResult = 0;
+}
+
+// Clear last entry
+function clearEntry() {
+    display.value = display.value.slice(0, -1);
+}
+
+// Calculate result
+function calculate() {
+    try {
+        let expression = display.value;
+        
+        // Replace symbols for evaluation
+        expression = expression.replace(/×/g, '*')
+                               .replace(/÷/g, '/')
+                               .replace(/−/g, '-')
+                               .replace(/\^/g, '**')
+                               .replace(/mod/g, '%')
+                               .replace(/√\(/g, 'Math.sqrt(')
+                               .replace(/sin\(/g, 'Math.sin(')
+                               .replace(/cos\(/g, 'Math.cos(')
+                               .replace(/tan\(/g, 'Math.tan(')
+                               .replace(/log\(/g, 'Math.log10(')
+                               .replace(/ln\(/g, 'Math.log(')
+                               .replace(/exp\(/g, 'Math.exp(')
+                               .replace(/abs\(/g, 'Math.abs(')
+                               .replace(/floor\(/g, 'Math.floor(');
+        
+        // Handle factorial
+        if (expression.includes('!')) {
+            let parts = expression.split('!');
+            let num = parseFloat(parts[0]);
+            let fact = 1;
+            for(let i = 1; i <= num; i++) fact *= i;
+            expression = fact + parts.slice(1).join('');
+        }
+        
+        // Handle power function (x^y)
+        if (expression.includes('^')) {
+            expression = expression.replace(/\^/g, '**');
+        }
+        
+        // Safe evaluation using Function constructor
+        let result = new Function('return ' + expression)();
+        
+        // Format result
+        if (!isFinite(result)) {
+            throw new Error('Invalid calculation');
+        }
+        
+        // Store history
+        history.value = display.value + ' =';
+        
+        // Format result (limit decimals)
+        if (Number.isInteger(result)) {
+            display.value = result;
+        } else {
+            display.value = result.toFixed(8).replace(/\.?0+$/, '');
+        }
+        
+        lastResult = result;
+        
+    } catch (error) {
+        display.value = 'Error';
+        console.error('Calculation error:', error);
     }
+}
 
-    // --- core calculation & display ---
-    function computeResult() {
-        const a = parseFloat(num1.value);
-        const b = parseFloat(num2.value);
-
-        // validation: at least a must be valid for all ops (sqrt needs a, others need both)
-        if (isNaN(a)) {
-            resultDisplay.value = 'ERR: missing A';
-            return;
-        }
-
-        // special case: sqrt uses only a, but we still allow b to be anything (ignored)
-        if (currentOp === '√A') {
-            const raw = operations['√A'](a);
-            if (isNaN(raw)) {
-                resultDisplay.value = 'NaN (negative sqrt?)';
-                return;
-            }
-            resultDisplay.value = formatNumber(raw);
-            return;
-        }
-
-        // for all other ops, we need a valid b
-        if (isNaN(b)) {
-            resultDisplay.value = 'ERR: missing B';
-            return;
-        }
-
-        const opFunc = operations[currentOp];
-        if (!opFunc) {
-            resultDisplay.value = 'ERR: no operation';
-            return;
-        }
-
-        let raw;
-        try {
-            // pass a and b (functions expect two args, even for '%' which is fine)
-            raw = opFunc(a, b);
-        } catch (e) {
-            resultDisplay.value = 'ERR: calculation failed';
-            return;
-        }
-
-        if (typeof raw === 'number' && isNaN(raw)) {
-            resultDisplay.value = 'NaN (div by zero?)';
-            return;
-        }
-
-        resultDisplay.value = formatNumber(raw);
+// Evaluate expression safely (helper for power functions)
+function evaluateExpression(expr) {
+    try {
+        expr = expr.replace(/×/g, '*')
+                   .replace(/÷/g, '/')
+                   .replace(/−/g, '-');
+        let result = new Function('return ' + expr)();
+        return result;
+    } catch {
+        return expr;
     }
+}
 
-    // --- helper: format number without excessive decimals ---
-    function formatNumber(value) {
-        if (!isFinite(value)) return '∞';
-        if (Math.abs(value - Math.round(value)) < 1e-12) return value.toFixed(0);
-        // limit to 10 decimal places, then trim trailing zeros
-        let str = value.toFixed(12).replace(/\.?0+$/, '');
-        if (str.endsWith('.')) str = str.slice(0, -1);
-        return str;
+// Keyboard support
+document.addEventListener('keydown', function(event) {
+    const key = event.key;
+    
+    // Numbers
+    if (/[0-9]/.test(key)) {
+        addToDisplay(key);
     }
-
-    // --- event listeners for operation buttons ---
-    btnAdd.addEventListener('click', () => setOperation('+'));
-    btnSub.addEventListener('click', () => setOperation('−'));
-    btnMul.addEventListener('click', () => setOperation('×'));
-    btnDiv.addEventListener('click', () => setOperation('÷'));
-    btnPow.addEventListener('click', () => setOperation('xʸ'));
-    btnMod.addEventListener('click', () => setOperation('mod'));
-    btnSqrt.addEventListener('click', () => setOperation('√A'));
-    btnPercent.addEventListener('click', () => setOperation('%'));
-
-    // --- calculate button ---
-    calculateBtn.addEventListener('click', computeResult);
-
-    // --- Enter key triggers calculation ---
-    function handleEnter(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            computeResult();
-        }
+    
+    // Operators
+    if (key === '+' || key === '-' || key === '*' || key === '/') {
+        let op = key;
+        if (key === '*') op = '×';
+        if (key === '/') op = '÷';
+        addToDisplay(op);
     }
-    num1.addEventListener('keydown', handleEnter);
-    num2.addEventListener('keydown', handleEnter);
+    
+    // Enter key for calculate
+    if (key === 'Enter') {
+        event.preventDefault();
+        calculate();
+    }
+    
+    // Backspace for clear entry
+    if (key === 'Backspace') {
+        clearEntry();
+    }
+    
+    // Escape for clear all
+    if (key === 'Escape') {
+        clearAll();
+    }
+    
+    // Decimal point
+    if (key === '.') {
+        addToDisplay('.');
+    }
+    
+    // Parentheses
+    if (key === '(' || key === ')') {
+        addToDisplay(key);
+    }
+});
 
-    // --- utility: clear inputs ---
-    clearInputsBtn.addEventListener('click', () => {
-        num1.value = '';
-        num2.value = '';
-        resultDisplay.value = '';
-        num1.focus();
-    });
-
-    // --- example: 144 ÷ 12  (and set operation to ÷) ---
-    exampleBtn.addEventListener('click', () => {
-        num1.value = '144';
-        num2.value = '12';
-        setOperation('÷');
-        computeResult();
-    });
-
-    // --- swap A and B ---
-    swapBtn.addEventListener('click', () => {
-        const temp = num1.value;
-        num1.value = num2.value;
-        num2.value = temp;
-        // keep current operation, but recalc optionally? better recalc for convenience
-        computeResult();
-    });
-
-    // --- reset result field only ---
-    resetResultBtn.addEventListener('click', () => {
-        resultDisplay.value = '';
-    });
-
-    // --- double‑click on result recalc (handy) ---
-    resultDisplay.addEventListener('dblclick', computeResult);
-
-    // --- set default active operation (+) and run initial calculation (12 + 5 = 17) ---
-    setOperation('+');
-    computeResult();
-
-    // --- prevent context menu on buttons for cleaner look ---
-    document.querySelectorAll('button').forEach(btn => {
-        btn.addEventListener('contextmenu', (e) => e.preventDefault());
-    });
-})();
+// Initialize display
+clearAll();
