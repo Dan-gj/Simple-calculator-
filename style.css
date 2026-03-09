@@ -1,0 +1,281 @@
+/* styles.css – high‑level calculator clean & modern */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+    background: radial-gradient(circle at 20% 30%, #eef2f9, #d9e0ed);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.calculator {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 3rem;
+    padding: 2.2rem 2rem;
+    box-shadow: 0 30px 50px rgba(18, 25, 45, 0.25),
+                inset 0 2px 6px rgba(255,255,255,0.8);
+    width: 100%;
+    max-width: 580px;
+    border: 1px solid rgba(255,255,255,0.7);
+}
+
+h1 {
+    font-weight: 550;
+    font-size: 2.1rem;
+    letter-spacing: -0.5px;
+    color: #18233a;
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+}
+
+h1 span {
+    background: #28344e;
+    color: white;
+    font-size: 1rem;
+    font-weight: 440;
+    padding: 0.25rem 1rem;
+    border-radius: 40px;
+    box-shadow: inset 0 1px 3px rgba(255,255,255,0.3);
+}
+
+.sub {
+    color: #2b3b5e;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+    border-left: 5px solid #5f7bbf;
+    padding-left: 1.2rem;
+    background: rgba(255,255,255,0.3);
+    border-radius: 0 20px 20px 0;
+}
+
+.input-group {
+    margin-bottom: 1.8rem;
+}
+
+label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 540;
+    color: #1e2b47;
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+}
+
+label i {
+    color: #3d5a9b;
+    font-style: normal;
+    font-weight: 620;
+    background: rgba(255,255,255,0.5);
+    padding: 0.15rem 0.8rem;
+    border-radius: 30px;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 1rem 1.4rem;
+    font-size: 1.25rem;
+    border: 2px solid transparent;
+    border-radius: 2.5rem;
+    background: #edf2fc;
+    box-shadow: inset 5px 5px 12px #c2cbde, inset -8px -8px 16px #ffffff;
+    transition: 0.15s;
+    outline: none;
+    font-weight: 480;
+    color: #121f37;
+}
+
+input[type="number"]:focus {
+    border-color: #5f7bbf;
+    background: #ffffff;
+    box-shadow: inset 3px 3px 8px #b5c0d6, inset -5px -5px 12px #ffffff;
+}
+
+/* hide spinners */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type=number] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+.operations {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin: 2.2rem 0 1.8rem;
+    justify-content: center;
+}
+
+.op-btn {
+    background: #ecf0f9;
+    border: none;
+    width: 4.4rem;
+    height: 4.4rem;
+    font-size: 1.9rem;
+    font-weight: 600;
+    border-radius: 2rem;
+    box-shadow: 7px 7px 16px #c2cbdb, -7px -7px 14px #ffffff, inset 0 0 0 transparent;
+    cursor: pointer;
+    color: #1d2b48;
+    transition: 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.op-btn:hover {
+    background: #e2e8f5;
+    box-shadow: 5px 5px 12px #b3bdd2, -5px -5px 10px #ffffff;
+    transform: scale(0.98);
+}
+
+.op-btn:active {
+    background: #d3dcef;
+    box-shadow: inset 5px 5px 12px #b0bad0, inset -5px -5px 10px #ffffff;
+    color: #091833;
+}
+
+.equals-area {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    margin: 1.8rem 0 1.8rem;
+    flex-wrap: wrap;
+}
+
+.equals-btn {
+    background: #28344e;
+    border: none;
+    padding: 1rem 2.5rem;
+    font-size: 1.7rem;
+    font-weight: 500;
+    border-radius: 3rem;
+    box-shadow: 0 12px 22px -8px #151f36, inset 0 -2px 2px rgba(255,255,255,0.2);
+    color: white;
+    cursor: pointer;
+    transition: 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+.equals-btn:hover {
+    background: #31436b;
+    box-shadow: 0 10px 20px -5px #101b30;
+    transform: scale(1.02);
+}
+
+.equals-btn:active {
+    background: #1b253f;
+    box-shadow: inset 5px 5px 14px #0a1221, inset -4px -4px 8px #3e507c;
+    transform: scale(0.98);
+}
+
+.result-box {
+    background: #dee6f3;
+    border-radius: 3rem;
+    padding: 0.7rem 1.8rem;
+    box-shadow: inset 3px 3px 10px #b1bbd0, inset -8px -8px 18px #ffffff;
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.result-label {
+    font-weight: 550;
+    color: #314十五e;
+    font-size: 1.15rem;
+    white-space: nowrap;
+}
+
+#resultDisplay {
+    background: transparent;
+    border: 0;
+    font-size: 2.1rem;
+    font-weight: 620;
+    color: #0c1a33;
+    width: 100%;
+    text-align: right;
+    outline: none;
+    padding: 0.2rem 0;
+    letter-spacing: -0.5px;
+}
+
+#resultDisplay::placeholder {
+    color: #7685ac;
+    font-weight: 420;
+    font-size: 1.6rem;
+}
+
+.memory-bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.6rem;
+    margin-top: 1.8rem;
+    padding-top: 1rem;
+    border-top: 2px dashed #95a9cf;
+}
+
+.memory-btn {
+    background: #e8eefa;
+    border: none;
+    font-size: 1rem;
+    padding: 0.6rem 1.3rem;
+    border-radius: 2.8rem;
+    font-weight: 520;
+    color: #1f2f55;
+    box-shadow: 5px 5px 12px #b6c2da, -5px -5px 10px #ffffff;
+    cursor: pointer;
+    transition: 0.1s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.memory-btn:hover {
+    background: #dde4f5;
+    box-shadow: 3px 3px 8px #a5b1cb, -4px -4px 8px #ffffff;
+}
+
+.memory-btn:active {
+    background: #cdd7ef;
+    box-shadow: inset 4px 4px 10px #9fabc5, inset -4px -4px 8px #ffffff;
+}
+
+.memory-btn.clear {
+    background: #f3e9e9;
+    color: #572e2e;
+}
+
+footer {
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    text-align: center;
+    color: #3d4f7a;
+    opacity: 0.85;
+    border-top: 1px solid rgba(255,255,255,0.6);
+    padding-top: 1rem;
+}
