@@ -3,60 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>high‑level calculator · split files</title>
-    <!-- link to external CSS -->
+    <title>Scientific Calculator | Brown Orange Theme</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="calculator">
-        <h1>
-            ⚙️ high‑level calculator
-            <span>v2</span>
-        </h1>
-        <div class="sub">enter numbers, choose operation — then press [=]</div>
-
-        <!-- input panel -->
-        <div class="input-group">
-            <label><i>A</i> first operand</label>
-            <input type="number" id="num1" placeholder="e.g. 24.5" value="12" step="any">
+        <div class="display-container">
+            <input type="text" id="display" class="display" readonly placeholder="0">
+            <div class="history" id="history"></div>
         </div>
-        <div class="input-group">
-            <label><i>B</i> second operand</label>
-            <input type="number" id="num2" placeholder="e.g. 7" value="5" step="any">
+        
+        <div class="button-grid">
+            <!-- Row 1: Scientific functions -->
+            <button class="btn scientific" onclick="addFunction('sin(')">sin</button>
+            <button class="btn scientific" onclick="addFunction('cos(')">cos</button>
+            <button class="btn scientific" onclick="addFunction('tan(')">tan</button>
+            <button class="btn scientific" onclick="addFunction('log(')">log</button>
+            <button class="btn scientific" onclick="addFunction('ln(')">ln</button>
+            <button class="btn scientific" onclick="addFunction('√(')">√</button>
+            
+            <!-- Row 2: Scientific + Clear -->
+            <button class="btn scientific" onclick="addFunction('π')">π</button>
+            <button class="btn scientific" onclick="addFunction('e')">e</button>
+            <button class="btn scientific" onclick="addFunction('^')">x^y</button>
+            <button class="btn scientific" onclick="addFunction('!')">n!</button>
+            <button class="btn operator" onclick="clearAll()">AC</button>
+            <button class="btn operator" onclick="clearEntry()">CE</button>
+            
+            <!-- Row 3: Numbers and operators -->
+            <button class="btn number" onclick="addToDisplay('7')">7</button>
+            <button class="btn number" onclick="addToDisplay('8')">8</button>
+            <button class="btn number" onclick="addToDisplay('9')">9</button>
+            <button class="btn operator" onclick="addToDisplay('/')">÷</button>
+            <button class="btn operator" onclick="addToDisplay('(')">(</button>
+            <button class="btn operator" onclick="addToDisplay(')')">)</button>
+            
+            <!-- Row 4 -->
+            <button class="btn number" onclick="addToDisplay('4')">4</button>
+            <button class="btn number" onclick="addToDisplay('5')">5</button>
+            <button class="btn number" onclick="addToDisplay('6')">6</button>
+            <button class="btn operator" onclick="addToDisplay('*')">×</button>
+            <button classbtn number" onclick="addToDisplay('mod')">mod</button>
+            <button class="btn scientific" onclick="addFunction('abs(')">abs</button>
+            
+            <!-- Row 5 -->
+            <button class="btn number" onclick="addToDisplay('1')">1</button>
+            <button class="btn number" onclick="addToDisplay('2')">2</button>
+            <button class="btn number" onclick="addToDisplay('3')">3</button>
+            <button class="btn operator" onclick="addToDisplay('-')">−</button>
+            <button class="btn scientific" onclick="addFunction('^2')">x²</button>
+            <button class="btn scientific" onclick="addFunction('^(1/2)')">ˣ√</button>
+            
+            <!-- Row 6 -->
+            <button class="btn number" onclick="addToDisplay('0')">0</button>
+            <button class="btn number" onclick="addToDisplay('.')">.</button>
+            <button class="btn operator" onclick="calculate()">=</button>
+            <button class="btn operator" onclick="addToDisplay('+')">+</button>
+            <button class="btn scientific" onclick="addFunction('exp(')">exp</button>
+            <button class="btn scientific" onclick="addFunction('floor(')">floor</button>
         </div>
-
-        <!-- operation buttons (6 basic + 2 extra) -->
-        <div class="operations">
-            <button class="op-btn" id="opAdd" title="addition">+</button>
-            <button class="op-btn" id="opSub" title="subtraction">−</button>
-            <button class="op-btn" id="opMul" title="multiplication">×</button>
-            <button class="op-btn" id="opDiv" title="division">÷</button>
-            <button class="op-btn" id="opPow" title="power (A ^ B)">xʸ</button>
-            <button class="op-btn" id="opMod" title="modulus (remainder)">mod</button>
-            <button class="op-btn" id="opSqrt" title="square root of A (ignores B)">√A</button>
-            <button class="op-btn" id="opPercent" title="A% of B">%</button>
-        </div>
-
-        <!-- main calculate row + result -->
-        <div class="equals-area">
-            <button class="equals-btn" id="calculateBtn"><i>=</i> calculate</button>
-            <div class="result-box">
-                <span class="result-label">result</span>
-                <input type="text" id="resultDisplay" readonly placeholder="0" value="17">
-            </div>
-        </div>
-
-        <!-- memory & utility bar (extended) -->
-        <div class="memory-bar">
-            <button class="memory-btn" id="clearInputs" title="clear both numbers">🧹 clear A&B</button>
-            <button class="memory-btn" id="recallExample" title="load example 144 ÷ 12">📋 example</button>
-            <button class="memory-btn" id="swapNumbers" title="swap A and B">🔄 swap</button>
-            <button class="memory-btn clear" id="resetResult" title="reset result only">🗑️ reset</button>
-        </div>
-        <footer>⚡ click op → then [=]  ·  sqrt uses A  ·  % = (A/100)*B</footer>
     </div>
 
-    <!-- external JavaScript -->
     <script src="script.js"></script>
 </body>
 </html>
